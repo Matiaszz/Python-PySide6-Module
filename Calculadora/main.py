@@ -6,7 +6,7 @@ from variables import ICON_ADRESS
 from display import Display
 from info import Info
 from styles import setupTheme
-from buttons import Button
+from buttons import ButtonGrid
 if __name__ == '__main__':
     # Create app
     app = QApplication(sys.argv)
@@ -19,14 +19,16 @@ if __name__ == '__main__':
 
     # Info
     info = Info('2.0 ^ 10 = 1024')
-    window.addToVLayout(info)
+    window.addWidgetToVLayout(info)
     # Display
     display = Display()
-    window.addToVLayout(display)
+    window.addWidgetToVLayout(display)
 
+    # Grid
+    buttonGrid = ButtonGrid(display)
+    window.vLayout.addLayout(buttonGrid)
     # button
-    button = Button('Texto do botão')
-    window.addToVLayout(button)
+
     # Execution
     window.adjustFixedSize()
     window.show()
