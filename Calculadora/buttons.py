@@ -39,7 +39,7 @@ class ButtonGrid(QGridLayout):
                 self.addWidget(button, i, j)
 
                 self.buttonSlot = self._makeDisplayConnection(
-                    self.signal, button)
+                    self._signal, button)
 
                 button.clicked.connect(self.buttonSlot)
 
@@ -49,5 +49,5 @@ class ButtonGrid(QGridLayout):
             func(*args, **kwargs)
         return realSlot
 
-    def signal(self, button: Button):
+    def _signal(self, button: Button):
         self.display.insert(button.text())
