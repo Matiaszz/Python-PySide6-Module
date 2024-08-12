@@ -18,16 +18,16 @@ if __name__ == '__main__':
     window.setWindowIcon(icon)
 
     # Info
-    info = Info('2.0 ^ 10 = 1024')
+    info = Info()
     window.addWidgetToVLayout(info)
+
     # Display
     display = Display()
     window.addWidgetToVLayout(display)
 
     # Grid
-    buttonGrid = ButtonGrid(display)
+    buttonGrid = ButtonGrid(display, info)
     window.vLayout.addLayout(buttonGrid)
-    # button
 
     # Execution
     window.adjustFixedSize()
