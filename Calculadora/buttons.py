@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from info import Info
     from display import Display
 
+import math
 from PySide6.QtWidgets import QPushButton, QGridLayout
 from PySide6.QtCore import Slot
 from variables import MEDIUM_SIZE
@@ -76,7 +77,10 @@ class ButtonGrid(QGridLayout):
         if text == 'C':
             self._clickSignal(button, self._clear)
 
-        if text in '+-/*':
+        if text in '◀':
+            self._clickSignal(button, self.display.backspace)
+
+        if text in '+-/*^':
             self._clickSignal(
                 button,
                 self._makeSlot(self._operatorClicked, button)
@@ -140,13 +144,22 @@ class ButtonGrid(QGridLayout):
 
             self.equation = f'{self._leftNumber} {self._operator}\
  {self._rightNumber} '
+            result = 'error'
 
-            # WARNING: transform string to command line python, be careful!
             try:
-                result = eval(self.equation)
+                if ('^' in self.equation) and \
+                        (isinstance(self._leftNumber, float)):
+
+                    result = math.pow(self._leftNumber, self._rightNumber)
+                    self.info.setText(f'{self.equation} = {result}')
+                else:
+                    result = eval(self.equation)
+            # WARNING: transform string to command line python, be careful!
             except ZeroDivisionError:
                 self._clear()
-                return
+
+            except OverflowError:
+                print('Numero muito grande')
 
             self.info.setText(f'{self.equation} = {result}')
 
@@ -154,4 +167,7 @@ class ButtonGrid(QGridLayout):
             self._operator = None
             self._rightNumber = None
 
-            self.display.setText(str(result))
+            if result == 'error':
+                self._leftNumber = None
+            # else:
+                # self.display.setText(str(result))
