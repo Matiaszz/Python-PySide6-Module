@@ -41,7 +41,6 @@ class ButtonGrid(QGridLayout):
         self._rightNumber = None
         self._operator = None
         self.equation = self._equationInitialValue
-        self._zeroDivisionErrorMsg = 'Zero is not divisible'
         self._readMask()
 
     @property
