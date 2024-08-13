@@ -10,3 +10,7 @@ def isValidNumber(str: str) -> bool:
         valid = False
 
     return valid
+
+
+def isEmpty(text: str):
+    return len(text) == 0

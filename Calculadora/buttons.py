@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from info import Info
     from display import Display
+    from main_window import Window
 
 import math
 from PySide6.QtWidgets import QPushButton, QGridLayout
@@ -25,7 +26,8 @@ class Button(QPushButton):
 
 
 class ButtonGrid(QGridLayout):
-    def __init__(self, display: 'Display', info: 'Info', *args, **kwargs):
+    def __init__(self, display: 'Display', info: 'Info', window: 'Window',
+                 *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._gridMask = [
             ['C', '◀', '^', '/'],
@@ -36,6 +38,7 @@ class ButtonGrid(QGridLayout):
         ]
         self.display = display
         self.info = info
+        self.window = window
         self._equationInitialValue = 'Your calculation'
         self.equation = self._equationInitialValue
         self._leftNumber = None
@@ -54,6 +57,10 @@ class ButtonGrid(QGridLayout):
         self.info.setText(value)
 
     def _readMask(self):
+        self.display.eqPressed.connect(self._eq)
+        self.display.clearPressed.connect(self._clear)
+        self.display.delPressed.connect(self.display.backspace)
+
         for i, row in enumerate(self._gridMask):
             for j, buttonText in enumerate(row):
                 button = Button(buttonText)
@@ -77,7 +84,7 @@ class ButtonGrid(QGridLayout):
         if text == 'C':
             self._clickSignal(button, self._clear)
 
-        if text in '◀':
+        if text == '◀':
             self._clickSignal(button, self.display.backspace)
 
         if text in '+-/*^':
@@ -86,7 +93,7 @@ class ButtonGrid(QGridLayout):
                 self._makeSlot(self._operatorClicked, button)
             )
 
-        if text in '=':
+        if text == '=':
             self._clickSignal(button, self._eq)
 
     def _makeSlot(self, func, *args, **kwargs):
@@ -118,6 +125,7 @@ class ButtonGrid(QGridLayout):
 
         # if user clicked on operator but dont clicked in a number before
         if not isValidNumber(displayText) and self._leftNumber is None:
+            self._showError('Nothing in display.')
             return
 
         # if the left number, program waits the right number
@@ -130,8 +138,8 @@ class ButtonGrid(QGridLayout):
     def _eq(self):
         displayText = self.display.text()
 
-        if not isValidNumber:
-            return
+        if not isValidNumber(displayText):
+            return self._showError('Incomplete calculation.')
 
         if self._leftNumber is not None and self._operator is None:
             return
@@ -157,9 +165,11 @@ class ButtonGrid(QGridLayout):
             # WARNING: transform string to command line python, be careful!
             except ZeroDivisionError:
                 self._clear()
+                return self._showError('Impossible to divise by zero.')
 
             except OverflowError:
-                print('Numero muito grande')
+                self._clear()
+                return self._showError('Impossible to calculate.')
 
             self.info.setText(f'{self.equation} = {result}')
 
@@ -169,5 +179,25 @@ class ButtonGrid(QGridLayout):
 
             if result == 'error':
                 self._leftNumber = None
-            # else:
-                # self.display.setText(str(result))
+
+    def _makeDialog(self, text, title):
+        msgBox = self.window.makeMsgBox()
+        msgBox.setWindowTitle(title)
+        msgBox.setText(text)
+        msgBox.setStandardButtons(msgBox.StandardButton.Ok)  # Generic icons
+
+        # # how to create others buttons on error case:
+        # msgBox.setStandardButtons(
+        #     msgBox.StandardButton.Ok  # | msgBox.StandardButton.Cancel
+        # )
+        return msgBox
+
+    def _showError(self, textError, title='Error'):
+        msgBox = self._makeDialog(textError, title)
+        msgBox.setIcon(msgBox.Icon.Critical)
+        msgBox.exec()
+
+    def _showInfo(self, textInfo, title='Info'):
+        msgBox = self._makeDialog(textInfo, title)
+        msgBox.setIcon(msgBox.Icon.Information)
+        msgBox.exec()
