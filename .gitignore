@@ -127,4 +127,5 @@ env
 venv
 .env
 __pycache__
+build
 >>>>>>> c53bc844f203e70eb7c06c81409c405d1a0cd83e
