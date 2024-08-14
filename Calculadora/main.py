@@ -7,6 +7,8 @@ from display import Display
 from info import Info
 from styles import setupTheme
 from buttons import ButtonGrid
+
+
 if __name__ == '__main__':
     # Create app
     app = QApplication(sys.argv)
